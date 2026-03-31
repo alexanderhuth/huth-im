@@ -1,0 +1,7 @@
+{
+  "name": "huth-im",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  }
+}
