@@ -8,32 +8,19 @@ const dist = "dist";
 if (fs.existsSync(dist)) fs.rmSync(dist, { recursive: true });
 fs.mkdirSync(dist);
 
-function redirectPage(url) {
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=${url}">
-  <link rel="canonical" href="${url}">
-  <title>Redirecting…</title>
-  <script>window.location.replace(${JSON.stringify(url)})</script>
-</head>
-<body>
-  <a href="${url}">Redirecting…</a>
-</body>
-</html>`;
+// Copy static assets (favicon, etc.) into dist root
+const staticDir = "static";
+if (fs.existsSync(staticDir)) {
+  for (const file of fs.readdirSync(staticDir)) {
+    if (file.startsWith(".")) continue;
+    fs.copyFileSync(path.join(staticDir, file), path.join(dist, file));
+  }
 }
+
 
 const shortLinks = Object.fromEntries(
   Object.entries(links).filter(([code]) => code !== "/")
 );
-
-// Generate per-link redirect pages
-for (const [code, url] of Object.entries(shortLinks)) {
-  const dir = path.join(dist, code);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, "index.html"), redirectPage(url));
-}
 
 // /all — HTML page listing all short links
 const allRows = Object.entries(shortLinks)
@@ -45,6 +32,9 @@ const allPage = `<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>huth.im/all</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <style>
     body { font-family: monospace; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
     a { color: inherit; }
@@ -68,6 +58,9 @@ const notFoundPage = `<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>404 — huth.im</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <style>
     body { font-family: monospace; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
     a { color: inherit; }
@@ -80,18 +73,16 @@ const notFoundPage = `<!DOCTYPE html>
 </html>`;
 fs.writeFileSync(path.join(dist, "404.html"), notFoundPage);
 
-// Generate _redirects for Cloudflare Pages (instant, no HTML roundtrip)
+// Generate _redirects for statichost.eu
 const redirectLines = [
-  ...Object.entries(shortLinks).map(([code, url]) => `/${code}  ${url}  301`),
+  ...Object.entries(shortLinks).flatMap(([code, url]) => [
+    `/${code}  ${url}  301`,
+    `/${code}/  ${url}  301`,
+  ]),
 ];
 if (links["/"]) redirectLines.push(`/  ${links["/"]}  301`);
 redirectLines.push(`/*  /404.html  404`);
 fs.writeFileSync(path.join(dist, "_redirects"), redirectLines.join("\n") + "\n");
 
-// Root index.html — homepage redirect (HTML fallback)
-fs.writeFileSync(
-  path.join(dist, "index.html"),
-  links["/"] ? redirectPage(links["/"]) : "<html><body>huth.im</body></html>"
-);
 
 console.log(`Built ${Object.keys(shortLinks).length} redirect(s) → dist/`);

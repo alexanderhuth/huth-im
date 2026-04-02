@@ -4,11 +4,9 @@ Personal short-URL service. Completely static — no server, no dependencies.
 
 ## How it works
 
-Edit `links.json`, run the build, deploy. Each short code becomes an HTML redirect page plus an entry in `_redirects` for instant 301s on Cloudflare Pages / statichost.eu.
+`links.json` defines the short codes. The build script generates `_redirects` for instant 301s on statichost.eu, plus an `/all` listing page and a 404 page. Output goes to `dist/`.
 
-## Adding or changing links
-
-Edit `links.json`:
+## links.json
 
 ```json
 {
@@ -29,15 +27,9 @@ node build.js
 npm run build
 ```
 
-Output goes to `dist/`.
-
 ## Special pages
 
 | Path | Description |
 |------|-------------|
 | `/all` | Lists all short codes and their targets |
 | `/*` | 404 page with a link to `/all` |
-
-## Deploy
-
-`statichost.yml` is already configured. Connect the repo and point your `huth.im` domain at the project.
