@@ -9,7 +9,7 @@ if (fs.existsSync(dist)) fs.rmSync(dist, { recursive: true });
 fs.mkdirSync(dist);
 
 // Copy static assets (favicon, etc.) into dist root
-const staticDir = "static";
+const staticDir = "public";
 if (fs.existsSync(staticDir)) {
   for (const file of fs.readdirSync(staticDir)) {
     if (file.startsWith(".")) continue;
@@ -32,6 +32,7 @@ const allPage = `<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>huth.im/all</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <style>
@@ -41,7 +42,7 @@ const allPage = `<!DOCTYPE html>
   </style>
 </head>
 <body>
-  <h1>huth.im</h1>
+  <h1>Alexander's Short URLs</h1>
   <table>
 ${allRows}
   </table>
@@ -57,6 +58,7 @@ const notFoundPage = `<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>404 — huth.im</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <style>
